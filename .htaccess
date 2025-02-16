@@ -1,0 +1,50 @@
+<IfModule pagespeed_module>
+    ModPagespeed off
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault A0
+    ExpiresByType image/gif A691200
+    ExpiresByType image/png A691200
+    ExpiresByType image/jpeg A691200
+    ExpiresByType text/css A691200
+    ExpiresByType text/javascript A691200
+    ExpiresByType application/javascript A691200
+    ExpiresByType font/otf A691200
+    ExpiresByType font/ttf A691200
+    ExpiresByType font/woff A691200
+    ExpiresByType font/woff2 A691200
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header unset User-Agent
+</IfModule>
+
+<FilesMatch "^(web\.config)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+    </IfModule>
+</FilesMatch>
+
+ErrorDocument 400 /errors/400.html
+ErrorDocument 401 /errors/401.html
+ErrorDocument 403 /errors/403.html
+ErrorDocument 404 /errors/404.html
+ErrorDocument 500 /errors/500.html
+
+
+RewriteEngine On
+
+# Redirect .php URLs to clean URLs
+RewriteCond %{THE_REQUEST} \s/([^.]+)\.php [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# Remove .php extension from URLs
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+RewriteBase /
