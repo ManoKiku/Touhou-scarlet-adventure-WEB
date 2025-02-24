@@ -51,7 +51,55 @@
         </div>
       </div>
     </section>
-
+    <!-- Records Section -->
+    <section id="records" class="section">
+      <div class="container">
+        <div class="records-container">
+          <h2>Leaderboard</h2>
+          <div class="scrollable-section">
+              <?php
+              $api_url = 'http://' . $_SERVER['HTTP_HOST'] . '/api/get-records.php';
+              
+              try {
+                  $response = file_get_contents($api_url);
+                  
+                  if($response === false) {
+                      throw new Exception('Failed to connect to the API');
+                  }
+                  
+                  $data = json_decode($response, true);
+                  
+                  if(json_last_error() !== JSON_ERROR_NONE) {
+                      throw new Exception('Invalid API response format');
+                  }
+                  
+                  if($data['status'] !== 'success') {
+                      echo '<div class="error-message">'.htmlspecialchars($data['message']).'</div>';
+                  } else {
+                      if(empty($data['records'])) {
+                          echo '<div class="status-message">No records available</div>';
+                      } else {
+                        $rank = 1;
+                        foreach($data['records'] as $record) {
+                            echo '
+                            <div class="record-item">
+                                <span class="rank">#'.$rank.'</span>
+                                <span class="username">'.htmlspecialchars($record['username']).'</span>
+                                <span class="score">'.number_format($record['score']).' points</span>
+                            </div>';
+                            $rank++;
+                        }
+                      }
+                  }
+                  
+              } catch(Exception $e) {
+                  echo '<div class="error-message">Error: '.htmlspecialchars($e->getMessage()).'</div>';
+              }
+              ?>
+          </div>
+        </div>
+      </div>
+    </section>
     <!-- Download Section -->
     <section id="download" class="section">
       <div class="container">
@@ -61,12 +109,12 @@
       </div>
     </section>
   </main>
-
+  
   <!-- Footer -->
   <footer>
     <div class="container">
       <div class="footer-content">
-        <p>&copy; 2023 Touhou Scarlet Adventure! All rights reserved.</p>
+        <p>&copy; 2025 Touhou Scarlet Adventure! All rights reserved.</p>
         <div class="social-links">
           <a target="_blank" href="https://discord.com/users/549927558339100674" aria-label="Discord"><i class="fab fa-discord"></i></a>
           <a target="_blank" href="https://github.com/ManoKiku" aria-label="GitHub"><i class="fab fa-github"></i></a>
