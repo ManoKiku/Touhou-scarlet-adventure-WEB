@@ -1,0 +1,5 @@
+// config for DB connection and hash pepper
+config.php
+
+// ftp config
+ftp_config.json
