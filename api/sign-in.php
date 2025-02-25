@@ -2,7 +2,6 @@
 header("Content-Type: application/json");
 require_once '../config.php' ;
 
-// Connect to MySQL
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 if ($conn->connect_error) {
@@ -18,7 +17,6 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-// Fetch user from the database
 $query = "SELECT id, username, password_hash FROM users WHERE username = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param('s', $username);
@@ -33,32 +31,25 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-// Verify the password
 if (!password_verify($password . HASH_PEPPER, $user['password_hash'])) {
     echo json_encode(['status' => 'error', 'message' => 'Invalid password']);
     exit;
 }
 
 try {
-// Generate tokens
-$accessToken = bin2hex(random_bytes(32)); // 64-character random string
-$refreshToken = bin2hex(random_bytes(32)); // 64-character random string
-$accessExpiration = time() + 3600; // 1 hour
-$refreshExpiration = time() + 604800; // 7 days
+  $accessToken = bin2hex(random_bytes(32));
+  $accessExpiration = time() + 604800; // 7 days 
 
-// Store tokens in the database
-$query = "INSERT INTO user_tokens (user_id, access_token, refresh_token, access_expires_at, refresh_expires_at) VALUES (?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($query);
-$stmt->bind_param('isssi', $user['id'], $accessToken, $refreshToken, $accessExpiration, $refreshExpiration);
-$stmt->execute();
+  $query = "INSERT INTO user_tokens (user_id, access_token, access_expires_at) VALUES (?, ?, ?)";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param('isi', $user['id'], $accessToken, $accessExpiration);
+  $stmt->execute();
 
-// Return tokens to the user
-echo json_encode([
+  echo json_encode([
     'status' => 'success',
     'message' => 'Login successful',
     'access_token' => $accessToken,
-    'refresh_token' => $refreshToken,
-    'expires_in' => 3600 // Token expiration time in seconds
+    'expires_in' => 604800// Token expiration time in seconds
 ]);
 }
 catch (Exception $e) {
